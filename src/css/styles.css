@@ -145,6 +145,7 @@ body {
 
 .gallery__item {
   position: relative;
+  height: 260px;
 }
 
 .item-gallery {
