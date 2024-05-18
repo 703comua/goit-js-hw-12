@@ -7,13 +7,18 @@ import 'izitoast/dist/css/iziToast.min.css';
 import { fetchPhotos, PER_PAGE } from './js/pixabay-api.js';
 import { createMarkup } from './js/render-functions.js';
 
-// import { testFn } from './js/test.js';
+import {
+  hideLoader,
+  showLoader,
+  showLoadMoreBtn,
+  hideLoadMoreBtn,
+  disableSearchFormSubmitBtn,
+  enableSearchFormSubmitBtn,
+} from './js/helpers/funcs.js';
 
 const galleryEl = document.querySelector('.js-gallery');
 const searchFormEl = document.querySelector('.js-search-form');
-const searchFormSubmitBtnEl = document.querySelector(
-  '.js-search-form-submit-btn'
-);
+const searchFormSubmitBtnEl = document.querySelector('.js-search-form-submit-btn');
 const loaderEl = document.querySelector('.js-loader');
 const loadMoreBtnEl = document.querySelector('.js-load-more-btn');
 
@@ -36,7 +41,7 @@ const onSearch = async event => {
   photosCurrentPage = 1;
 
   // Hide laod more btn
-  hideLoadMoreBtn();
+  hideLoadMoreBtn(loadMoreBtnEl);
 
   // Get query string
   const form = event.currentTarget;
@@ -55,10 +60,10 @@ const onSearch = async event => {
 
   try {
     // Disable search form submit button
-    disableSearchFormSubmitBtn();
+    disableSearchFormSubmitBtn(searchFormSubmitBtnEl);
 
     // Show loader
-    showLoader();
+    showLoader(loaderEl);
 
     // Get photos data
     const { hits, totalHits } = await fetchPhotos(query, photosCurrentPage);
@@ -66,7 +71,7 @@ const onSearch = async event => {
     // Check is empty query
     if (totalHits === 0) {
       // Enable search form submit button
-      enableSearchFormSubmitBtn();
+      enableSearchFormSubmitBtn(searchFormSubmitBtnEl);
 
       iziToast.error({
         message:
@@ -74,7 +79,7 @@ const onSearch = async event => {
         position: 'topRight',
       });
       form.reset();
-      hediLoader();
+      hideLoader(loaderEl);
       return;
     }
 
@@ -84,22 +89,22 @@ const onSearch = async event => {
     lightbox.refresh();
 
     // Hide loader
-    hediLoader();
+    hideLoader(loaderEl);
 
     // Enable search form submit button
-    enableSearchFormSubmitBtn();
+    enableSearchFormSubmitBtn(searchFormSubmitBtnEl);
 
     totalPages = Math.ceil(totalHits / PER_PAGE);
     if (totalPages > 1) {
       // Show laod more btn
-      showLoadMoreBtn();
+      showLoadMoreBtn(loadMoreBtnEl);
     }
   } catch (error) {
     // Enable search form submit button
-    enableSearchFormSubmitBtn();
+    enableSearchFormSubmitBtn(searchFormSubmitBtnEl);
 
     // Hide loader
-    hideLoader();
+    hideLoader(loaderEl);
 
     iziToast.error({
       message: 'Search params is not valid!',
@@ -137,10 +142,10 @@ const smoothScrollOnLoadMore = () => {
 const onLoadMorePress = async event => {
   try {
     // Hide laod more btn
-    hideLoadMoreBtn();
+    hideLoadMoreBtn(loadMoreBtnEl);
 
     // Show loader
-    showLoader();
+    showLoader(loaderEl);
 
     photosCurrentPage += 1;
 
@@ -155,12 +160,12 @@ const onLoadMorePress = async event => {
     smoothScrollOnLoadMore();
 
     // Hide loader
-    hediLoader();
+    hideLoader(loaderEl);
 
     totalPages = Math.ceil(totalHits / PER_PAGE);
     if (photosCurrentPage < totalPages) {
       // Show laod more btn
-      showLoadMoreBtn();
+      showLoadMoreBtn(loadMoreBtnEl);
     } else {
       loadMoreBtnEl.removeEventListener('click', onLoadMorePress);
       iziToast.info({
@@ -171,10 +176,10 @@ const onLoadMorePress = async event => {
     }
   } catch (error) {
     // Enable search form submit button
-    enableSearchFormSubmitBtn();
+    enableSearchFormSubmitBtn(searchFormSubmitBtnEl);
 
     // Hide loader
-    hideLoader();
+    hideLoader(loaderEl);
 
     iziToast.error({
       message: 'Search params is not valid!',
@@ -187,40 +192,3 @@ const onLoadMorePress = async event => {
 
 // Load more btn click
 loadMoreBtnEl.addEventListener('click', onLoadMorePress);
-
-///////////
-// Helpers
-///////////
-function hediLoader() {
-  loaderEl.classList.add('is-hidden');
-}
-
-function showLoader() {
-  loaderEl.classList.remove('is-hidden');
-}
-
-function showLoadMoreBtn() {
-  loadMoreBtnEl.classList.remove('is-hidden');
-}
-
-function hideLoadMoreBtn() {
-  loadMoreBtnEl.classList.add('is-hidden');
-}
-
-function disableSearchFormSubmitBtn() {
-  searchFormSubmitBtnEl.classList.add('is-disabled');
-}
-
-function enableSearchFormSubmitBtn() {
-  searchFormSubmitBtnEl.classList.remove('is-disabled');
-}
-
-// galleryEl.innerHTML = '';
-
-// const testFormEl = document.querySelector('.js-test-form');
-// testFormEl.addEventListener('submit', onTestFormSearch);
-
-// function onTestFormSearch() {
-//   event.preventDefault();
-//   testFn();
-// }
